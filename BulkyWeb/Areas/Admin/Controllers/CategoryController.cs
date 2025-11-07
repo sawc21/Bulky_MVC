@@ -3,10 +3,13 @@ using BulkyBook.DataAcess.Data;
 using Microsoft.AspNetCore.Mvc;
 using BulkyBook.DataAcess.Repository.IRepository;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
+using BulkyBook.Utility;
 
 namespace BulkyBookWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class CategoryController : Controller
     {
        

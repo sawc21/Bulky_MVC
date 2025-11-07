@@ -1,14 +1,17 @@
-﻿using BulkyBook.Models;
-using BulkyBook.DataAcess.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using BulkyBook.DataAcess.Data;
 using BulkyBook.DataAcess.Repository.IRepository;
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Diagnostics;
 
 namespace BulkyBookWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
        
