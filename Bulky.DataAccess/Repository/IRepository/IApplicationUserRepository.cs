@@ -8,9 +8,9 @@ using BulkyBook.Models;
 
 namespace BulkyBook.DataAcess.Repository.IRepository
 {
-    public interface ICategoryRepository : IRepository<Category>
+    public interface IApplicationUserRepository : IRepository<ApplicationUser>
     {
-        void Update(Category obj);
+       
         
     }
 }

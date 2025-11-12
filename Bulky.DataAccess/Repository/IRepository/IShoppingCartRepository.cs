@@ -1,5 +1,4 @@
 ﻿using System;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +7,9 @@ using BulkyBook.Models;
 
 namespace BulkyBook.DataAcess.Repository.IRepository
 {
-    public interface ICategoryRepository : IRepository<Category>
+    public interface IShoppingCartRepository : IRepository<ShoppingCart>
     {
-        void Update(Category obj);
+        void Update(ShoppingCart obj);
         
     }
 }

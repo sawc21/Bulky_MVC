@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using BulkyBook.DataAcess.Repository.IRepository;
 using BulkyBook.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BulkyBookWeb.Areas.Customer.Controllers
@@ -23,10 +25,53 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             return View(ProductList);
         }
 
-        public IActionResult Details(int? id)
+        public IActionResult Details(int id)
         {
-            Product product = _unitOfWork.Product.GetFirstOrDefault(u=>u.Id == id,includeProperties: "Category");
-            return View(product);
+            var product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id, includeProperties: "Category");
+            if (product == null) return NotFound();
+
+            var cart = new ShoppingCart
+            {
+                ProductId = id,
+                Product = product, // for display only; don't post it back
+                Count = 1
+            };
+            return View(cart);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public IActionResult Details([Bind("ProductId,Count")] ShoppingCart shoppingCart)
+        {
+            // Get user id safely
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // Never trust posted Id/Product
+            shoppingCart.ApplicationUserId = userId;
+
+            // Upsert: if same product already in this user's cart, just bump Count
+            var existing = _unitOfWork.ShoppingCart.GetFirstOrDefault(
+                sc => sc.ApplicationUserId == userId && sc.ProductId == shoppingCart.ProductId);
+
+            if (existing != null)
+            {
+                existing.Count += shoppingCart.Count;
+                _unitOfWork.ShoppingCart.Update(existing);
+                TempData["success"] = "Item added to cart successfully";
+            }
+            else
+            {
+                // Ensure EF doesn't try to insert Product from the nav prop
+                // (we didn't bind Product, so it's null; that's good)
+                _unitOfWork.ShoppingCart.Add(shoppingCart);
+                TempData["success"] = "Item added to cart successfully";
+            }
+            
+
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
         }
         public IActionResult Privacy()
         {
