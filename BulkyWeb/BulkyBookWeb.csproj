@@ -23,6 +23,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
     <PackageReference Include="Stripe.net" Version="49.2.0" />
+    <PackageReference Include="TinyMCE" Version="8.2.1" />
   </ItemGroup>
 
   <ItemGroup>
