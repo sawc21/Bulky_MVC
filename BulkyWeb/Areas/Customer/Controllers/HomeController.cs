@@ -1,9 +1,12 @@
-using System.Diagnostics;
-using System.Security.Claims;
 using BulkyBook.DataAcess.Repository.IRepository;
 using BulkyBook.Models;
+using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Security.Claims;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace BulkyBookWeb.Areas.Customer.Controllers
 {
@@ -20,7 +23,10 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
         }
 
         public IActionResult Index()
+
         {
+
+            
             IEnumerable<Product> ProductList = _unitOfWork.Product.GetAll(includeProperties: "Category");
             return View(ProductList);
         }
@@ -52,25 +58,29 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             shoppingCart.ApplicationUserId = userId;
 
             // Upsert: if same product already in this user's cart, just bump Count
-            var existing = _unitOfWork.ShoppingCart.GetFirstOrDefault(
+            ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(
                 sc => sc.ApplicationUserId == userId && sc.ProductId == shoppingCart.ProductId);
 
-            if (existing != null)
+            if (cartFromDb != null)
             {
-                existing.Count += shoppingCart.Count;
-                _unitOfWork.ShoppingCart.Update(existing);
+                cartFromDb.Count += shoppingCart.Count;
+                _unitOfWork.ShoppingCart.Update(cartFromDb);
                 TempData["success"] = "Item added to cart successfully";
+                _unitOfWork.Save();
             }
             else
             {
                 // Ensure EF doesn't try to insert Product from the nav prop
                 // (we didn't bind Product, so it's null; that's good)
                 _unitOfWork.ShoppingCart.Add(shoppingCart);
+                _unitOfWork.Save();
+                HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll(
+                sc => sc.ApplicationUserId == userId).Count());
                 TempData["success"] = "Item added to cart successfully";
             }
             
 
-            _unitOfWork.Save();
+            
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Privacy()
