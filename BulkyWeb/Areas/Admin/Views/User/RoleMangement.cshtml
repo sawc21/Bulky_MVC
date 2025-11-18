@@ -1,0 +1,99 @@
+﻿@model ApplicationUserVM
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-secondary bg-gradient m-lg-0 py-3">
+    </div>
+    <div class="card-body p-4">
+        <form method="post" class="row" enctype="multipart/form-data">
+            <input asp-for="applicationUser.Id" type="hidden" />
+
+            <div class="row">
+                <div class="col-10">
+                    <div class="border p-3 mt-4">
+                        @* <div asp-validation-summary="ModelOnly"></div> *@
+
+                        <!-- Name -->
+                        <div class="form-floating py-2 col-12">
+                            <input asp-for="applicationUser.Name" class="form-control border-0 shadow" />
+                            <label asp-for="applicationUser.Name" class="ms-2"></label>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="form-floating mb-3 col-md-6" id="RoleGroup">
+                            <select asp-for="applicationUser.Role"
+                                    asp-items="@Model.RoleList"
+                                    class="form-select"
+                                    id="Input_Role">
+                                <option disabled selected>-Select Role</option>
+                            </select>
+                            <label for="Input_Role">Role</label>
+                        </div>
+
+                        @{
+                            var companyStyle = "display:none;";
+                            if (Model.applicationUser.Role == SD.Role_Comp)
+                            {
+                                companyStyle = "display:block;";
+                            }
+                        }
+
+                        <!-- Company (hidden unless Role == Company) -->
+                        <div class="form-floating mb-3 col-md-6" id="CompanyGroup" style="@companyStyle">
+                            <select asp-for="applicationUser.CompanyId"
+                                    asp-items="@Model.CompanyList"
+                                    class="form-select"
+                                    id="Input_CompanyId">
+                                <option disabled selected>-Select Company</option>
+                            </select>
+                            <label for="Input_CompanyId">Company</label>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="row">
+                            <div class="col-6 col-md-3">
+                                <button type="submit" class="btn btn-primary form-control">Update</button>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <a asp-action="Index" class="btn btn-primary border form-control">
+                                    Back to Users
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-12 text-center">
+                    <h2 class="text-white py-2">User Management</h2>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+
+            function toggleCompany() {
+                // If RoleList values are actual role names, use .val()
+                var roleValue = $('#Input_Role').val();
+
+                if (roleValue === '@SD.Role_Comp') {
+                    $('#CompanyGroup').show();
+                } else {
+                    $('#CompanyGroup').hide();
+                    $('#Input_CompanyId').val('');
+                }
+            }
+
+            // On load
+            toggleCompany();
+
+            // On change
+            $('#Input_Role').on('change', toggleCompany);
+        });
+    </script>
+}

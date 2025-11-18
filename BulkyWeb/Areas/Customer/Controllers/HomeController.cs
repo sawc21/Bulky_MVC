@@ -27,19 +27,20 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
         {
 
             
-            IEnumerable<Product> ProductList = _unitOfWork.Product.GetAll(includeProperties: "Category");
+            IEnumerable<Product> ProductList = _unitOfWork.Product.GetAll(includeProperties: "Category,ProductImages");
             return View(ProductList);
         }
 
         public IActionResult Details(int id)
         {
-            var product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id, includeProperties: "Category");
-            if (product == null) return NotFound();
+            
+            
 
             var cart = new ShoppingCart
             {
                 ProductId = id,
-                Product = product, // for display only; don't post it back
+
+                Product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id, includeProperties: "Category,ProductImages"), // for display only; don't post it back
                 Count = 1
             };
             return View(cart);
